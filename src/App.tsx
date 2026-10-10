@@ -224,9 +224,12 @@ function App() {
       const responseBody = responseError.response?.data
       const loginDenied = authView === 'login' && responseError.response?.status === 401
       const responseStatus = responseError.response?.status
-      const loginRequiresVerification = authView === 'login' && responseStatus === 403
-      const registrationAccountExists =
-        authView === 'register' && (responseStatus === 403 || responseStatus === 409)
+      const responseDetail = responseBody?.detail ?? responseBody?.message ?? ''
+      const loginRequiresVerification =
+        authView === 'login' &&
+        responseStatus === 403 &&
+        /verify your email address before signing in/i.test(responseDetail)
+      const registrationAccountExists = authView === 'register' && responseStatus === 409
       setCanResendVerification(loginRequiresVerification || registrationAccountExists)
       setAuthError(
         loginDenied
@@ -235,8 +238,7 @@ function App() {
             ? 'Please verify your email address before signing in. Check your inbox or resend the verification email below.'
             : registrationAccountExists
               ? 'An account with this email may already exist. Verify your email or sign in. You can resend the verification email below.'
-              : (responseBody?.detail ??
-                responseBody?.message ??
+              : (responseDetail ||
                 (error instanceof Error ? error.message : 'Authentication failed.')),
       )
     } finally {
