@@ -86,23 +86,9 @@ Restart the backend after changing these environment variables. For deployment, 
 
 The Gemini API has free usage for some models subject to current model availability and quotas; limits and terms can change. Review your active limits in AI Studio. With unpaid/free Gemini API usage, Google may use submitted content to improve its products and human reviewers may process it. Do not enable this for sensitive, confidential, or personal database metadata. When enabled, DBInsight sends bounded schema metadata, detected findings, and normalized query digests to Google; database credentials and query-result rows are not sent. Use only with data you are authorized to share and after reviewing Google's applicable terms. Recommendations remain advisory and are never executed.
 
-Password reset is disabled by default. For Render deployments, use Resend's HTTPS API rather than SMTP (Render free services may not be able to connect to external SMTP ports). Create a Resend account, verify a sending domain/address, and create an API key. In the Render backend service's Environment settings, set:
-
-```text
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=<your Resend API key>
-PASSWORD_RESET_FROM=DBInsight <auth@your-verified-domain>
-FRONTEND_ORIGIN=https://dbinsight-ai-platform.netlify.app
-PASSWORD_RESET_ENABLED=true
-EMAIL_VERIFICATION_ENABLED=true
-```
-
-Keep the API key in Render's secret environment settings; never commit it or put it in frontend code. The sender address must be authorized by Resend. Resend's test sender may only deliver to the account owner's address until a domain is verified. The same provider is used for verification and password-reset emails. Redeploy or restart the backend after changing the environment variables.
-
-For local testing, either use Resend with the same variables above (replacing `FRONTEND_ORIGIN` with `http://localhost:5173`) or use Gmail SMTP. To enable Gmail SMTP, open PowerShell, set the following variables, and start the backend from that same PowerShell window. Replace the example email with the Gmail account that will send the messages:
+Password reset is disabled by default. To enable Gmail SMTP for local testing, open PowerShell, set the following variables, and start the backend from that same PowerShell window. Replace the example email with the Gmail account that will send the messages:
 
 ```powershell
-$env:EMAIL_PROVIDER = "smtp"
 $env:PASSWORD_RESET_ENABLED = "true"
 $env:EMAIL_VERIFICATION_ENABLED = "true"
 $env:SMTP_HOST = "smtp.gmail.com"
