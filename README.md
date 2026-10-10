@@ -69,6 +69,8 @@ To deploy the backend on Render separately from the frontend, create a Web Servi
 
 Swagger UI is available at `/swagger-ui/index.html` and the OpenAPI JSON document at `/v3/api-docs` on the backend host. The API uses a `JSESSIONID` session cookie for signed-in requests. Write operations that require administrative authorization may also require the `X-DBInsight-Token` header unless the signed-in account has the ADMIN role.
 
+When the frontend and backend are hosted on different sites (for example, Netlify and Render), configure the Render backend environment with `SESSION_COOKIE_SAME_SITE=none` and `SESSION_COOKIE_SECURE=true`. This allows the browser to send the HTTPS session cookie with cross-site API requests. Local development defaults to `lax` and non-secure cookies for `http://localhost`. Browser privacy settings that block third-party cookies may still prevent cross-site sessions; hosting both services under the same site avoids that limitation.
+
 Changing the application store from MySQL to PostgreSQL does not automatically copy rows from an existing MySQL deployment. Export and migrate existing users, monitored-target registrations, encrypted credentials, telemetry, recommendations, and alert records separately before switching; keep the same `DBINSIGHT_DATABASE_CREDENTIALS_KEY` so migrated encrypted credentials remain decryptable.
 
 ### Optional Gemini-assisted recommendations
