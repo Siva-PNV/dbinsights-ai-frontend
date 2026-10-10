@@ -349,7 +349,11 @@ export async function registerUser(
 
 export async function loginUser(email: string, password: string): Promise<AuthUser> {
   const normalizedEmail = email.trim().toLowerCase()
-  const response = await client.post<AuthUser>('/auth/login', { email: normalizedEmail, password })
+  const response = await client.post<AuthUser>(
+    '/auth/login',
+    { email: normalizedEmail, password },
+    { timeout: 35_000 },
+  )
   return response.data
 }
 
