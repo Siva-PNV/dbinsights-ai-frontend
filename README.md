@@ -86,9 +86,23 @@ Restart the backend after changing these environment variables. For deployment, 
 
 The Gemini API has free usage for some models subject to current model availability and quotas; limits and terms can change. Review your active limits in AI Studio. With unpaid/free Gemini API usage, Google may use submitted content to improve its products and human reviewers may process it. Do not enable this for sensitive, confidential, or personal database metadata. When enabled, DBInsight sends bounded schema metadata, detected findings, and normalized query digests to Google; database credentials and query-result rows are not sent. Use only with data you are authorized to share and after reviewing Google's applicable terms. Recommendations remain advisory and are never executed.
 
-Password reset is disabled by default. To enable Gmail SMTP for local testing, open PowerShell, set the following variables, and start the backend from that same PowerShell window. Replace the example email with the Gmail account that will send the reset messages:
+Password reset is disabled by default. For Render deployments, use Resend's HTTPS API rather than SMTP (Render free services may not be able to connect to external SMTP ports). Create a Resend account, verify a sending domain/address, and create an API key. In the Render backend service's Environment settings, set:
+
+```text
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=<your Resend API key>
+PASSWORD_RESET_FROM=DBInsight <auth@your-verified-domain>
+FRONTEND_ORIGIN=https://dbinsight-ai-platform.netlify.app
+PASSWORD_RESET_ENABLED=true
+EMAIL_VERIFICATION_ENABLED=true
+```
+
+Keep the API key in Render's secret environment settings; never commit it or put it in frontend code. The sender address must be authorized by Resend. Resend's test sender may only deliver to the account owner's address until a domain is verified. The same provider is used for verification and password-reset emails. Redeploy or restart the backend after changing the environment variables.
+
+For local testing, either use Resend with the same variables above (replacing `FRONTEND_ORIGIN` with `http://localhost:5173`) or use Gmail SMTP. To enable Gmail SMTP, open PowerShell, set the following variables, and start the backend from that same PowerShell window. Replace the example email with the Gmail account that will send the messages:
 
 ```powershell
+$env:EMAIL_PROVIDER = "smtp"
 $env:PASSWORD_RESET_ENABLED = "true"
 $env:EMAIL_VERIFICATION_ENABLED = "true"
 $env:SMTP_HOST = "smtp.gmail.com"
@@ -115,7 +129,6 @@ mvn spring-boot:run
 For Gmail, use a Google **App Password**, not your regular Gmail password. App Passwords require 2-Step Verification and can be created in your Google Account security settings. These environment variables apply only to the current PowerShell window; set them again when restarting the backend. Keep the App Password private and never commit it. For other SMTP providers, use their server settings instead.
 
 With `EMAIL_VERIFICATION_ENABLED=true`, new registrations receive a verification email and cannot sign in until they use its link. Verification links expire after 24 hours by default; override this with `EMAIL_VERIFICATION_TOKEN_TTL_HOURS`. Existing accounts created before email verification was enabled remain usable. To disable registration verification, set `EMAIL_VERIFICATION_ENABLED=false`; when unset, it follows `PASSWORD_RESET_ENABLED`. Password reset links expire after 30 minutes by default; override the lifetime with `PASSWORD_RESET_TOKEN_TTL_MINUTES`. The password reset API responds generically whether or not the submitted email belongs to an account.
-$env:EMAIL_VERIFICATION_ENABLED = "true"
 
 To connect an external target, open **Connections → Connect database** and enter a MySQL database name, host, port, and dedicated read-only account. The target must be reachable from the backend and support TLS. The backend tests the connection before saving encrypted credentials and marking the target active. Health/schema analysis then use that target; Performance Schema query telemetry requires appropriate privileges and Performance Schema enabled on the target.
 
