@@ -208,14 +208,8 @@ function App() {
           authForm.password,
         )
         setAuthForm({ name: '', email: '', password: '' })
-        if (result.verificationRequired) {
-          setAuthView('login')
-          setForgotStatus(result.message)
-        } else if (result.user) {
-          persistAuthUser(result.user)
-        } else {
-          throw new Error('Registration completed without an account response.')
-        }
+        setAuthView('login')
+        setForgotStatus(result.message)
       }
     } catch (error) {
       const responseError = error as {
