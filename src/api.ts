@@ -90,7 +90,7 @@ export async function getMonitoredDatabases(): Promise<MonitoredDatabase[]> {
 export async function registerMonitoredDatabase(
   database: DatabaseRegistration,
 ): Promise<MonitoredDatabase> {
-  const response = await client.post<MonitoredDatabase>('/databases', database)
+  const response = await client.post<MonitoredDatabase>('/databases', database, { timeout: 35_000 })
   return response.data
 }
 
