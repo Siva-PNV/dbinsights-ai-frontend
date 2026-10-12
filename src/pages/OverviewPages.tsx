@@ -445,7 +445,7 @@ export function LiveOverview({
             <ScoreRow
               label="Query performance"
               value={healthScore.queryScore}
-              color="unavailable"
+              color={healthScore.queryPerformanceAvailable ? 'green' : 'unavailable'}
               detail={
                 healthScore.queryPerformanceAvailable
                   ? 'Based on Performance Schema digest latency'
