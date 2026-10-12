@@ -37,8 +37,8 @@ const client = axios.create({
     import.meta.env.VITE_API_URL ??
     (import.meta.env.DEV
       ? 'http://localhost:8080/api'
-      : 'https://dbinsights-ai-intelligence-database.onrender.com/api'),
-  timeout: 2500,
+      : 'https://dbinsights-ai-platform.cloud.run/api'),
+  timeout: 35_000,
   withCredentials: true,
 })
 
@@ -100,7 +100,7 @@ export async function removeMonitoredDatabase(databaseId: number): Promise<void>
 
 export async function getHealthScore(databaseId?: number): Promise<HealthScore> {
   const endpoint = databaseId ? `/databases/${databaseId}/health` : '/health'
-  const response = await client.get<HealthScore>(endpoint)
+  const response = await client.get<HealthScore>(endpoint, { timeout: 35_000 })
   return response.data
 }
 
@@ -248,7 +248,7 @@ export async function getLiveRecommendations(
 ): Promise<LiveRecommendationResponse> {
   const response = await client.get<unknown>('/recommendations', {
     params: databaseId ? { databaseId } : {},
-    timeout: 60_000,
+    timeout: 120_000,
   })
   const payload = response.data
   if (Array.isArray(payload)) {

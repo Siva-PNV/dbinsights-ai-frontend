@@ -67,6 +67,21 @@ The API listens on `http://localhost:8080`. Override `FRONTEND_ORIGIN` if the fr
 
 To deploy the backend on Render separately from the frontend, create a Web Service from this repository, select **Docker**, and set the Root Directory to `backend` so Render uses `backend/Dockerfile` and builds with the backend as its context. Configure the PostgreSQL and other backend environment variables on the Render service; do not bake credentials into the image.
 
+### Deploy the backend to Cloud Run with Cloud SQL
+
+The backend includes the Cloud SQL PostgreSQL socket factory. In Google Cloud, enable the Cloud SQL Admin API and grant the Cloud Run service's runtime service account the **Cloud SQL Client** role. Use the Cloud SQL instance connection name (`PROJECT_ID:REGION:INSTANCE_ID`) and create the application database and database user in the instance. If the instance uses a private IP address, configure Cloud Run with VPC access to that network.
+
+Set these Cloud Run environment variables/secrets:
+
+```text
+DBINSIGHT_DB_URL=jdbc:postgresql:///DATABASE_NAME?cloudSqlInstance=PROJECT_ID:REGION:INSTANCE_ID&socketFactory=com.google.cloud.sql.postgres.SocketFactory
+DBINSIGHT_DB_USER=DATABASE_USER
+DBINSIGHT_DB_PASSWORD=<store as a Cloud Run secret>
+DBINSIGHT_DATABASE_CREDENTIALS_KEY=<store as a Cloud Run secret>
+```
+
+Replace the database name and instance connection name with your values. Keep the username and password separate from the JDBC URL; do not use a `postgres://` URL or include `username:password@host`. Configure the encryption key as a persistent secret so saved monitored-database credentials remain decryptable after a new revision or restart. The service listens on Cloud Run's `PORT` automatically. For a private-IP-only Cloud SQL instance, configure the connector to use its private IP by adding `&ipTypes=PRIVATE` to the URL and provide the required VPC egress route.
+
 Swagger UI is available at `/swagger-ui/index.html` and the OpenAPI JSON document at `/v3/api-docs` on the backend host. The API uses a `JSESSIONID` session cookie for signed-in requests. Write operations that require administrative authorization may also require the `X-DBInsight-Token` header unless the signed-in account has the ADMIN role.
 
 When the frontend and backend are hosted on different sites (for example, Netlify and Render), configure the Render backend environment with `SESSION_COOKIE_SAME_SITE=none` and `SESSION_COOKIE_SECURE=true`. This allows the browser to send the HTTPS session cookie with cross-site API requests. Local development defaults to `lax` and non-secure cookies for `http://localhost`. Browser privacy settings that block third-party cookies may still prevent cross-site sessions; hosting both services under the same site avoids that limitation.
